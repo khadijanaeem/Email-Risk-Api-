@@ -1,0 +1,10 @@
+# Starter fallback list. GitHub Actions replaces this file with the maintained upstream list daily.
+mailinator.com
+10minutemail.com
+guerrillamail.com
+temp-mail.org
+tempmail.com
+yopmail.com
+getnada.com
+maildrop.cc
+throwawaymail.com

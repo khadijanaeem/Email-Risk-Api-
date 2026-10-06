@@ -1,0 +1,63 @@
+services:
+
+  # email-risk-api:  # <--- Change this to match your actual API service block name
+  #   build: .
+  #   ports:
+  #     - "8000:8000"
+  #   # FORCE THE CONTAINER TO USE RELIABLE PUBLIC DNS SERVERS DIRECTLY
+  #   dns:
+  #     - 8.8.8.8    # Google DNS
+  #     - 1.1.1.1    # Cloudflare DNS
+  #   depends_on:
+  #     - postgres
+  #     - redis
+
+  email-risk-api:
+    build: ./backend
+   # container_name: email-risk-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://risk:risk@postgres:5432/riskdb
+      REDIS_URL: redis://redis:6379/0
+      API_KEY_PREFIX: rk_live_
+      APP_NAME: Email Risk API
+      DEBUG: "true"
+    dns:
+      - 8.8.8.8    # Google DNS
+      - 1.1.1.1    # Cloudflare DNS
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: email-risk-postgres
+    environment:
+      POSTGRES_USER: risk
+      POSTGRES_PASSWORD: risk
+      POSTGRES_DB: riskdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U risk -d riskdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: email-risk-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
