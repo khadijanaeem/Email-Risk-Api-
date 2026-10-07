@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     app_name: str = "Email Risk API"
     debug: bool = False
     database_url: str
+    
     redis_url: str | None = None
     api_key_prefix: str = "rk_live_"
     dns_servers: str = "1.1.1.1,8.8.8.8"
@@ -27,6 +28,7 @@ class Settings(BaseSettings):
     rdap_cache_ttl_seconds: int = 86400
     cors_origins: str = "http://localhost:3000"
     max_bulk_size: int = 100
+    rapidapi_proxy_secret: str | None = None
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

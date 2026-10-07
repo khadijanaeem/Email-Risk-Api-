@@ -8,7 +8,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from fastapi import Request, Response , APIRouter
-from .auth import get_api_key
+from .auth import get_api_key, require_rapidapi
 from .config import settings 
 from .database import Base, engine, get_db
 from .models import ApiKey, DomainCache, Usage, User
@@ -331,7 +331,7 @@ def create_key(payload: CreateKeyRequest, db: Session = Depends(get_db)):
 
 #     )
 
-@app.post("/v1/check", response_model=CheckResponse, tags=["Email"], summary="Check email risk",
+@app.post("/v1/check", response_model=CheckResponse,   dependencies=[Depends(require_rapidapi)], tags=["Email"], summary="Check email risk",
     description=(
         "Analyzes an email address for disposable domains, "
         "free providers, DNS signals, domain age, and "
@@ -357,7 +357,7 @@ def check_email(request: Request,  response: Response, payload: CheckRequest, db
     db.commit()
     return result
 
-@app.post("/v1/bulk-check", response_model=list[CheckResponse], tags=["Email"])
+@app.post("/v1/bulk-check", response_model=list[CheckResponse],   dependencies=[Depends(require_rapidapi)], tags=["Email"])
 @limiter.limit("10/minute")
 
 def bulk_check(

@@ -33,7 +33,37 @@ from sqlalchemy.orm import Session
 
 from .database import get_db
 from .models import ApiKey
+import secrets
 
+from fastapi import Header, HTTPException, status
+
+from .config import settings
+
+
+def require_rapidapi(
+    x_rapidapi_proxy_secret: str | None = Header(
+        default=None,
+        alias="X-RapidAPI-Proxy-Secret",
+    ),
+):
+    expected = getattr(settings, "rapidapi_proxy_secret", None)
+
+    if not expected:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="RapidAPI authentication is not configured.",
+        )
+
+    if not x_rapidapi_proxy_secret or not secrets.compare_digest(
+        x_rapidapi_proxy_secret,
+        expected,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Request must come through RapidAPI.",
+        )
+
+    return True
 
 security = HTTPBearer()
 
